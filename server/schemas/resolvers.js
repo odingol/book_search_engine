@@ -4,8 +4,12 @@ const { User } = require('../models');
 
 const resolvers = {
     Query: {
-        me: async () => {
-            return User.find({});
+        me: async (parent, args, context) => {
+            if (context.user) {
+                const userData = await User.findOne({ _id: context.user._id }).select('-__v -password');
+                return userData;
+            }
+            throw new AuthenticationError("User must be logged in!");
         }
     },
     Mutation: {
@@ -45,13 +49,27 @@ const resolvers = {
 
             return { token, user }
         },
-        // saveBook: async (parent, { authors, description, title, bookId, image, link }) => {
-        //     return User.findOneAndUpdate(
-        //         { _id: bookId },
-        //     )
-        // },
-        removeBook: async (parent, { bookId }) => {
-            return User.findOneAndDelete({bookId})
+        saveBook: async (parent, { authors, description, title, bookId, image, link }, context) => {
+            if (context.user) {
+                const updatedUser = await User.findByIdAndUpdate(
+                    {_id: context.user._id },
+                    { $push: {savedBooks: authors, description, title, bookId, image, link }},
+                    {new: true }
+                );
+                return updatedUser;
+            }
+            throw new AuthenticationError("User needs to be logged in!");
+        },
+        removeBook: async (parent, { bookId }, context ) => {
+            if (context.user) {
+                const updatedUser = await User.findOneAndUpdate(
+                    {_id: context.user._id },
+                    { $pull: { saveBooks: { bookId }}},
+                    { new: true }
+                );
+                return updatedUser;
+            } 
+            throw new AuthenticationError("User needs to be logged in!");
         }
     }
 };
