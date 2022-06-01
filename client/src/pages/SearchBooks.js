@@ -34,7 +34,7 @@ const SearchBooks = () => {
       const response = await searchGoogleBooks(searchInput);
 
       if (!response.ok) {
-        throw new Error('something went wrong!');
+        throw new Error('Error has occurred!');
       }
 
       const { items } = await response.json();

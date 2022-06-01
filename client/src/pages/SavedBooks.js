@@ -9,7 +9,7 @@ import { REMOVE_BOOK } from "../utils/mutations";
 
 const SavedBooks = () => {
   const { loading, data } = useQuery(GET_ME);
-  const userData = data.me || [];
+  const userData = data?.me || [];
 
   const [removeBook] = useMutation(REMOVE_BOOK);
 
@@ -27,7 +27,7 @@ const SavedBooks = () => {
       });
   
       if (!response.ok) {
-        throw new Error('something went wrong!');
+        throw new Error('Error has occurred!');
       }
       // upon success, remove book's id from localStorage
       removeBookId(bookId);
